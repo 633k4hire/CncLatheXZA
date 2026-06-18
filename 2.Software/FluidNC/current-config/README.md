@@ -6,10 +6,14 @@ mini lathe after the FluidNC lathe feature work was brought forward.
 Files:
 
 - `maijker_xzact_mini_lathe.yaml` - MKS-DLC32 V2.1 machine config for the XZACt
-  lathe build.
-- `maijker_tool_change.gcode` - 5-tool turret M6 macro referenced by the config.
+  lathe build. The five-tool turret uses FluidNC's `maijker_5_station_turret`
+  ATC driver rather than an SD-card `m6_macro`.
 - `lathe-v3-config-audit.md` - current config audit, commissioning risks, and
   open physical validation items.
+
+Legacy reference:
+
+- [`../../../3.Documentation/legacy/maijker_tool_change_legacy.gcode`](../../../3.Documentation/legacy/maijker_tool_change_legacy.gcode)
 
 Commissioning checklist:
 

@@ -17,7 +17,7 @@ commissioning before cutting.
 | Threading | `enable_threading: false` | Threading must remain disabled until encoder feedback is proven. |
 | Encoder | `encoder_enable: false`, pulse/index `NO_PIN` | Dashboard should show encoder/threading unsafe. |
 | Homing | X cycle 1, Z cycle 2 | Verify direction and switch polarity before full `$H`. |
-| Turret | 5-tool HBridge/M6 macro | Requires manual active-tool initialization and dry turret tests. |
+| Turret | First-class `maijker_5_station_turret` ATC | Requires `M61Qn` confirmed-tool initialization and dry turret tests. |
 | E-stop/control inputs | All config control pins `NO_PIN` | Physical E-stop must be external and tested independently. |
 
 ## Axis Audit
@@ -74,28 +74,29 @@ Physical validation required:
 - Confirm homing direction and pull-off.
 - Confirm the 90 mm travel value before relying on soft limits.
 
-### A Axis - Turret Indexing
+### Turret ATC - Maijker 5-Station Toolchanger
 
 Current settings:
 
-- Axis path: `axes.a`
-- Purpose: tool changer axis
-- `steps_per_mm: 320`
-- `max_rate_mm_per_min: 1000`
-- `acceleration_mm_per_sec2: 50`
-- `max_travel_mm: 100000`
-- `soft_limits: false`
-- Limit pins: `NO_PIN`
-- Hard limits: false
+- Config path: `maijker_5_station_turret`
+- `station_count: 5`
 - Step pin: `i2so.7`
-- Direction pin: `NO_PIN`
-- Direction control: `digital0_pin: gpio.5` through `M62 P0` / `M63 P0`
+- Direction pin: `gpio.5`
+- `steps_per_station: 320`
+- `step_rate_hz: 400`
+- `overshoot_steps: 32`
+- `lock_backoff_steps: 24`
+- `require_confirmed_tool: true`
+- `current_tool: 0`
+- `sensor_pin: NO_PIN`
 
 Physical validation required:
 
-- Confirm `M62 P0` and `M63 P0` drive the expected turret direction behavior.
-- Confirm one macro station increment equals one actual turret station.
-- Confirm the reverse lock/backlash move lands repeatably.
+- Confirm `gpio.5` direction is stable before `i2so.7` step pulses.
+- Confirm one driver station increment equals one actual turret station.
+- Confirm forward overshoot and reverse lock/backlash move land repeatably.
+- Confirm `M61Qn` initializes the physical station before first open-loop M6.
+- Confirm `ESP421` reports turret configured/current/confirmed state.
 - Confirm reset/alarm recovery procedure if a turret move is interrupted.
 
 ### C Axis - Commanded Spindle/C Axis
@@ -155,7 +156,7 @@ Current settings:
 - `tool_num: 5`
 - `speed_map: 0=0.000% 2000=100.000%`
 - `off_on_alarm: true`
-- `m6_macro: $SD/Run=maijker_tool_change.gcode`
+- `atc: maijker_5_station_turret`
 
 Physical validation required:
 
@@ -163,35 +164,39 @@ Physical validation required:
 - Confirm `M5`, `S0`, reset, alarm, and physical E-stop stop spindle output.
 - Confirm `tool_num: 5` matches the actual turret count and FluidDial T1-T5 UI.
 
-## M6 Macro Audit
+## First-Class Turret ATC Audit
 
-Audit target: `maijker_tool_change.gcode`
+Audit target: FluidNC `maijker_5_station_turret` ATC driver
 
 Current behavior:
 
-- Reads target tool from `#T`.
-- Assumes `#<current_tool>` is already initialized.
-- Does nothing if target equals current tool.
+- Handles `T1` through `T5` through the normal `Tn` + `M6` path.
+- Blocks M6 until the current turret station is confirmed by config, `M61Qn`,
+  or future sensor home.
+- Does nothing if target equals current confirmed tool.
 - Computes forward wraparound delta over 5 tools.
-- Commands turret direction with `M62 P0`.
-- Moves A forward by `delta + 0.1`.
-- Commands reverse/lock direction with `M63 P0`.
-- Moves A by `-0.076`.
-- Updates `#<current_tool>` to target.
+- Drives direction internally on `gpio.5`.
+- Pulses the turret step input internally on `i2so.7`.
+- Moves forward by native station steps plus overshoot.
+- Moves reverse by native lock/backoff steps.
+- Updates FluidNC current tool only after the ATC reports success.
+- Reports turret state through `ESP421`.
 
 Commissioning risks:
 
-- If `#<current_tool>` is not initialized correctly after boot, the first tool
-  change can index to the wrong station.
-- The macro has no physical turret sensor confirmation.
-- The macro has no automatic recovery if reset/alarm occurs mid-change.
+- If the confirmed tool state is initialized incorrectly after boot, the first
+  tool change can index to the wrong station.
+- The current config has no physical turret sensor confirmation.
+- Open-loop recovery after reset/alarm still requires physical station
+  inspection and deliberate `M61Qn` reinitialization.
 - The FluidDial V3 UI blocks duplicate M6 sends while pending, but it cannot
   prove the mechanical turret position without reliable FluidNC state and
   operator validation.
 
 Required validation:
 
-- Establish the boot-time procedure for initializing `#<current_tool>`.
+- Establish the boot-time procedure for initializing the current station with
+  `M61Qn`.
 - Dry-run every transition T1 through T5 and wraparound T5 to T1.
 - Verify same-tool `Tn M6` performs no motion.
 - Verify the active tool reported through `ESP421` matches the physical turret.
@@ -247,7 +252,7 @@ Required machine safety posture:
 | Verify X/Z direction and homing behavior. | | Open | |
 | Verify X/Z switch polarity and hard-limit behavior. | | Open | |
 | Verify X/Z travel and soft-limit values. | | Open | |
-| Define and document boot-time `#<current_tool>` initialization. | | Open | |
+| Define and document boot-time `M61Qn` confirmed-tool initialization. | | Open | |
 | Dry-run all turret transitions and same-tool no-op behavior. | | Open | |
 | Verify C axis command behavior and whether `$HC` is allowed. | | Open | |
 | Verify probe polarity, startup behavior, and low-feed `G38.2`. | | Open | |

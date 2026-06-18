@@ -13,12 +13,14 @@ The active machine configuration is in
 [`2.Software/FluidNC/current-config`](2.Software/FluidNC/current-config):
 
 - [`maijker_xzact_mini_lathe.yaml`](2.Software/FluidNC/current-config/maijker_xzact_mini_lathe.yaml)
-  - MKS-DLC32 V2.1 FluidNC config for the current XZACt mini lathe build.
-- [`maijker_tool_change.gcode`](2.Software/FluidNC/current-config/maijker_tool_change.gcode)
-  - five-tool turret `M6` macro referenced by the config.
+  - MKS-DLC32 V2.1 FluidNC config for the current XZACt mini lathe build, using
+    the first-class `maijker_5_station_turret` ATC driver.
 - [`lathe-v3-config-audit.md`](2.Software/FluidNC/current-config/lathe-v3-config-audit.md)
   - audit of the checked-in config and the physical validation items that remain
     open before cutting.
+
+The old SD-card turret macro is preserved only as a legacy reference at
+[`3.Documentation/legacy/maijker_tool_change_legacy.gcode`](3.Documentation/legacy/maijker_tool_change_legacy.gcode).
 
 ## Commissioning
 

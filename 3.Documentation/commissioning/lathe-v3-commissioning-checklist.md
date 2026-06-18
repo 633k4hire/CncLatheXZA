@@ -24,7 +24,7 @@ Complete this before the first powered motion in a commissioning session:
 | Open Status and confirm the lathe dashboard is active. | | |
 | Confirm the displayed operator axes are X/Z/C. | | |
 | Confirm encoder/threading state is visibly unsafe while encoder is disabled. | | |
-| Confirm active tool shown by `ESP421` matches the physical turret or stop and initialize `#<current_tool>` deliberately. | | |
+| Confirm `ESP421` reports turret configured and tool confirmed, or initialize the physical turret station deliberately with `M61Qn`. | | |
 | Confirm no pending or recoverable FluidDial lathe command is shown before enabling motion. | | |
 | Use only one confirmed M6 command at a time; do not repeat M6 while FluidDial shows `Wait`, `Still waiting`, `Timed out`, or `Alarm during command`. | | |
 
@@ -38,7 +38,7 @@ If FluidDial shows a recoverable M6 error such as `Timed out` or
 | Stop motion and use physical E-stop if there is any uncertainty. | | |
 | Verify the turret's physical station and lock state. | | |
 | Verify FluidNC alarm/state and clear/reset only after the machine is safe. | | |
-| Reinitialize or correct `#<current_tool>` deliberately if it no longer matches the physical turret. | | |
+| Reinitialize or correct the active turret station deliberately with `M61Qn` if it no longer matches the physical turret. | | |
 | Use FluidDial `Clear` only after the physical turret and FluidNC state are understood. | | |
 | Send the next M6 only after FluidDial has no pending/recoverable lathe command. | | |
 
@@ -59,7 +59,7 @@ power behavior before any actuator can move.
 | Physical E-stop removes power from stepper drives and spindle drive without relying on firmware. | | |
 | Releasing E-stop does not automatically start motion or spindle output. | | |
 | FluidNC boots with `maijker_xzact_mini_lathe.yaml` and reports no config load errors. | | |
-| FluidNC SD card contains `maijker_tool_change.gcode` at the path referenced by `m6_macro`. | | |
+| FluidNC reports the `maijker_5_station_turret` ATC driver in startup/config logs. | | |
 | FluidDial connects over the intended transport and remains connected for 10 minutes. | | |
 | FluidDial Status scene switches to the lathe dashboard when `ESP421` reports `Lathe enabled=true`. | | |
 | FluidDial dashboard shows X/Z/C slots, not generic X/Y/Z, on the lathe config. | | |
@@ -120,21 +120,24 @@ Do not install a cutting tool until dry motion is repeatable.
 
 ## 4. Five-Tool Turret
 
-Goal: prove turret macro behavior before any turret station can crash into the
+Goal: prove first-class turret ATC behavior before any turret station can crash into the
 workpiece, chuck, or machine.
 
 Preparation:
 
 - Keep the turret physically clear of the spindle/chuck/work envelope.
 - Mark each turret station.
-- Initialize `#<current_tool>` intentionally before the first automatic tool
-  change after boot.
-- If `#<current_tool>` is wrong, the first real turret motion can index the
-  wrong station. Treat this as a hard commissioning gate, not a convenience
-  setting.
+- Initialize the current station intentionally with `M61Qn` before the first
+  automatic tool change after boot unless `maijker_5_station_turret.current_tool`
+  is deliberately configured to a verified station.
+- If FluidNC's confirmed tool state is wrong, the first real turret motion can
+  index the wrong station. Treat this as a hard commissioning gate, not a
+  convenience setting.
 
 | Check | Pass | Notes |
 | --- | --- | --- |
+| Boot with `current_tool: 0` blocks `Tn M6` until `M61Qn` initializes the physical station. | | |
+| `ESP421` reports `Turret configured=true` and `Turret tool confirmed=true` after initialization. | | |
 | `T1 M6` from known tool 1 performs no motion. | | |
 | `T2 M6` advances exactly one station and locks consistently. | | |
 | `T3 M6`, `T4 M6`, and `T5 M6` each advance the expected number of stations from known state. | | |
