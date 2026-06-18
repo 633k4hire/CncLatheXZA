@@ -14,6 +14,34 @@ Current required posture:
 - No cutting tool installed until dry motion, homing, limits, and turret motion
   have passed.
 
+## Pre-First-Motion FluidDial Operator Script
+
+Complete this before the first powered motion in a commissioning session:
+
+| Step | Pass | Notes |
+| --- | --- | --- |
+| Connect FluidDial to FluidNC and wait for stable connected state. | | |
+| Open Status and confirm the lathe dashboard is active. | | |
+| Confirm the displayed operator axes are X/Z/C. | | |
+| Confirm encoder/threading state is visibly unsafe while encoder is disabled. | | |
+| Confirm active tool shown by `ESP421` matches the physical turret or stop and initialize `#<current_tool>` deliberately. | | |
+| Confirm no pending or recoverable FluidDial lathe command is shown before enabling motion. | | |
+| Use only one confirmed M6 command at a time; do not repeat M6 while FluidDial shows `Wait`, `Still waiting`, `Timed out`, or `Alarm during command`. | | |
+
+## Stuck Pending M6 Recovery
+
+If FluidDial shows a recoverable M6 error such as `Timed out` or
+`Alarm during command`, do not immediately send another tool change.
+
+| Step | Pass | Notes |
+| --- | --- | --- |
+| Stop motion and use physical E-stop if there is any uncertainty. | | |
+| Verify the turret's physical station and lock state. | | |
+| Verify FluidNC alarm/state and clear/reset only after the machine is safe. | | |
+| Reinitialize or correct `#<current_tool>` deliberately if it no longer matches the physical turret. | | |
+| Use FluidDial `Clear` only after the physical turret and FluidNC state are understood. | | |
+| Send the next M6 only after FluidDial has no pending/recoverable lathe command. | | |
+
 ## Session Record
 
 | Date | Operator | FluidNC commit/config | FluidDial commit | Result | Notes |
@@ -101,6 +129,9 @@ Preparation:
 - Mark each turret station.
 - Initialize `#<current_tool>` intentionally before the first automatic tool
   change after boot.
+- If `#<current_tool>` is wrong, the first real turret motion can index the
+  wrong station. Treat this as a hard commissioning gate, not a convenience
+  setting.
 
 | Check | Pass | Notes |
 | --- | --- | --- |
