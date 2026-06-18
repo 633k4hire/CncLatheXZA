@@ -8,6 +8,12 @@ Files:
 - `maijker_xzact_mini_lathe.yaml` - MKS-DLC32 V2.1 machine config for the XZACt
   lathe build.
 - `maijker_tool_change.gcode` - 5-tool turret M6 macro referenced by the config.
+- `lathe-v3-config-audit.md` - current config audit, commissioning risks, and
+  open physical validation items.
+
+Commissioning checklist:
+
+- [`lathe-v3-commissioning-checklist.md`](../../../3.Documentation/commissioning/lathe-v3-commissioning-checklist.md)
 
 The physical spindle encoder is intentionally not enabled yet. The config keeps:
 
