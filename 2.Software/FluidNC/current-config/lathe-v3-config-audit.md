@@ -297,7 +297,7 @@ arbitrary remote G-code write path. The exact schema, units, nullable fields,
 conditions, and stop semantics are in the FluidNC repository document
 `docs/tams-fluidnc-telemetry-v1.md`.
 
-Build this board with the `maijker_wifi` PlatformIO environment. It retains two
-OTA application slots using the machine-specific `maijker_4mb_ota.csv`
-partition layout.
+Build this board with the `maijker_wifi` PlatformIO environment. It omits the
+unused onboard-OLED implementation so the firmware and bundled filesystem fit
+the standard 4 MiB layout while retaining two OTA application slots.
 | Keep `lathe.enable_threading: false` until a separate encoder/threading checklist passes. | | Open | |

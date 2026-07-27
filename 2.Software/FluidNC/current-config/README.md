@@ -16,11 +16,12 @@ Files:
   open physical validation items.
 
 Firmware must be built with the FluidNC `maijker_wifi` PlatformIO environment,
-which uses the machine-specific two-slot OTA partition layout. The matching
-firmware's TAMS contract is `$ESP425` read-only telemetry, `$ESP426` exclusive
-shared-chuck ownership selection, and `$ESP427` bounded X/Z probing. See the
-audit before commissioning; the turret has no mechanical confirmation sensor
-and the physical E-stop has no controller feedback.
+which omits unused onboard-OLED code so the firmware and bundled filesystem fit
+the standard two-slot 4 MiB layout. The matching firmware's TAMS contract is
+`$ESP425` read-only telemetry, `$ESP426` exclusive shared-chuck ownership
+selection, and `$ESP427` bounded X/Z probing. See the audit before
+commissioning; the turret has no mechanical confirmation sensor and the
+physical E-stop has no controller feedback.
 
 Legacy reference:
 
