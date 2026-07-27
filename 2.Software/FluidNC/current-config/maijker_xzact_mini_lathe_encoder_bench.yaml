@@ -1,6 +1,6 @@
 board: MKS-DLC32 V2.1
-name: XZACt_MiniLathe
-meta: Maijker mini lathe config, brought forward from the recovered 2025 XZACt build.
+name: XZACt_MiniLathe_EncoderBench
+meta: Maijker mini lathe encoder bench config. AS5600/StepperSpindle pulse-index validation only; threading remains disabled.
 
 kinematics:
   Cartesian:
@@ -208,11 +208,11 @@ lathe:
   shared_chuck: true
   c_axis: 5
   feedback_stale_ms: 250
-  encoder_enable: false
-  # MKS-DLC32 V2.1 candidates after the physical spindle encoder is installed:
-  # - gpio.33 on EXP1 is the preferred pulse input candidate because this config does not use it.
-  # - gpio.39 on EXP2 is input-only and may be usable for index if SD-card detect is not wired on the board.
-  # Keep these disabled until the encoder is physically installed and verified at low spindle speed.
-  encoder_pulse_pin: NO_PIN
-  encoder_index_pin: NO_PIN
-  encoder_pulses_per_rev: 1
+  encoder_enable: true
+  # AS5600/StepperSpindle bench feedback:
+  # - StepperSpindle GPIO14 synthetic pulse output -> MKS gpio.33
+  # - StepperSpindle GPIO15 synthetic index output -> MKS gpio.39
+  # Keep enable_threading false until low-speed ESP421 feedback is proven.
+  encoder_pulse_pin: gpio.33
+  encoder_index_pin: gpio.39
+  encoder_pulses_per_rev: 64
