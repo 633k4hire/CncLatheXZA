@@ -1,6 +1,6 @@
 board: MKS-DLC32 V2.1
 name: XZACt_MiniLathe
-meta: Maijker mini lathe config, brought forward from the recovered 2025 XZACt build.
+meta: Maijker mini lathe config, confirmed against unchanged OG wiring for deployment.
 
 kinematics:
   Cartesian:
@@ -164,7 +164,9 @@ HBridge:
   s0_with_disable: true
   spinup_ms: 1000
   spindown_ms: 1000
-  tool_num: 5
+  # This is the first and only spindle definition. tool_num selects among
+  # multiple spindles; it is not the turret station count.
+  tool_num: 0
   speed_map: 0=0.000% 2000=100.000%
   off_on_alarm: true
   atc: maijker_5_station_turret
@@ -209,10 +211,8 @@ lathe:
   c_axis: 5
   feedback_stale_ms: 250
   encoder_enable: false
-  # MKS-DLC32 V2.1 candidates after the physical spindle encoder is installed:
-  # - gpio.33 on EXP1 is the preferred pulse input candidate because this config does not use it.
-  # - gpio.39 on EXP2 is input-only and may be usable for index if SD-card detect is not wired on the board.
-  # Keep these disabled until the encoder is physically installed and verified at low spindle speed.
+  # No spindle/C-axis encoder is currently installed. Keep feedback and
+  # threading disabled until encoder hardware is installed and commissioned.
   encoder_pulse_pin: NO_PIN
   encoder_index_pin: NO_PIN
   encoder_pulses_per_rev: 1

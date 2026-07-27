@@ -164,7 +164,9 @@ HBridge:
   s0_with_disable: true
   spinup_ms: 1000
   spindown_ms: 1000
-  tool_num: 5
+  # This is the first and only spindle definition. tool_num selects among
+  # multiple spindles; it is not the turret station count.
+  tool_num: 0
   speed_map: 0=0.000% 2000=100.000%
   off_on_alarm: true
   atc: maijker_5_station_turret
