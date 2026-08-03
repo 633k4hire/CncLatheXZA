@@ -29,9 +29,10 @@ Current settings:
 
 - Axis path: `axes.x`
 - Machine axis index: 0
-- `steps_per_mm: 320`
-- `max_rate_mm_per_min: 5000`
-- `acceleration_mm_per_sec2: 500`
+- A4988 microstep DIP: `1 ON, 2 ON, 3 ON` (1/16)
+- `steps_per_mm: 640`
+- `max_rate_mm_per_min: 600`
+- `acceleration_mm_per_sec2: 25`
 - `max_travel_mm: 60`
 - `soft_limits: true`
 - Homing cycle: 1
@@ -55,9 +56,10 @@ Current settings:
 
 - Axis path: `axes.z`
 - Machine axis index: 2
-- `steps_per_mm: 320`
-- `max_rate_mm_per_min: 5000`
-- `acceleration_mm_per_sec2: 500`
+- A4988 microstep DIP: `1 ON, 2 ON, 3 ON` (1/16)
+- `steps_per_mm: 640`
+- `max_rate_mm_per_min: 600`
+- `acceleration_mm_per_sec2: 25`
 - `max_travel_mm: 90`
 - `soft_limits: true`
 - Homing cycle: 2
@@ -106,7 +108,9 @@ Current settings:
 
 - Axis path: `axes.c`
 - Machine axis index: 5
-- `steps_per_mm: 533.333`
+- Direct drive: 1:1, no belt reduction
+- External driver microstep DIP: `S1 OFF, S2 ON, S3 OFF` (1/8)
+- `steps_per_mm: 4.444444` steps/degree
 - `max_rate_mm_per_min: 2000`
 - `acceleration_mm_per_sec2: 75`
 - `max_travel_mm: 100000`
