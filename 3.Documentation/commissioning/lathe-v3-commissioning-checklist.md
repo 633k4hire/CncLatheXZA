@@ -102,6 +102,44 @@ Preparation:
 
 Stop if direction, limit polarity, or homing behavior is uncertain.
 
+### Low-speed jog vibration gate
+
+Do not treat maximum driver current as a normal operating target. Excess
+current adds heat and can make each commanded step excite the machine more
+strongly; it does not repair a resonance, a coarse microstep setting, or a
+binding slide.
+
+Before changing a driver switch, record for X and Z:
+
+- Plug-in driver make and exact part number.
+- Motor rated phase current.
+- Driver current-limit setting or measured Vref.
+- All three DLC32 microstep DIP positions.
+- Present `steps_per_mm` and a measured 10 mm travel result.
+
+Change DIP switches only with drive power removed. Use the exact driver's
+truth table because A4988, DRV8825, and TMC-family modules do not share one
+universal switch table. When changing from one microstep ratio to another,
+preserve scale with:
+
+```text
+new_steps_per_mm = old_steps_per_mm * new_microsteps / old_microsteps
+```
+
+At the commissioned `640 steps/mm`, a `0.01 mm` command contains 6.4 step
+pulses. The matching X and Z A4988 DIP setting is `1 ON, 2 ON, 3 ON` (1/16).
+Verify actual travel with an indicator; do not change `steps_per_mm` without
+the matching physical DIP change.
+
+| Low-speed check | Pass | Notes |
+| --- | --- | --- |
+| Driver current is set from the motor and driver ratings, not simply to maximum. | | |
+| X and Z microstep DIP settings and matching `steps_per_mm` are recorded. | | |
+| A single `0.01 mm` jog is smooth enough for setup work and lands repeatably. | | |
+| Repeated `0.1 mm` jogs do not produce stop/start hammering. | | |
+| A continuous `G1` low-feed move is smooth; otherwise inspect current, phase wiring, coupler alignment, gib preload, and screw binding. | | |
+| The motor and driver remain within acceptable temperature after a 10-minute hold/motion test. | | |
+
 ## 3. Dry Motion, No Tooling
 
 Goal: prove repeatable coordinated motion at low risk.

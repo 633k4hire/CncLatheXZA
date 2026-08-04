@@ -14,11 +14,12 @@ commissioning before cutting.
 | --- | --- | --- |
 | Lathe mode | `lathe.enable: true` | FluidDial should auto-detect lathe mode through `ESP421`. |
 | X/Z operator axes | `x_axis: 0`, `z_axis: 2` | FluidDial maps X/Z/C display slots to machine axes 0/2/5. |
+| Shared chuck | `shared_chuck: true`, `c_axis: 5` | C positioning and HBridge spindle output are mutually exclusive because they drive the same physical chuck. |
 | Threading | `enable_threading: false` | Threading must remain disabled until encoder feedback is proven. |
 | Encoder | `encoder_enable: false`, pulse/index `NO_PIN` | Dashboard should show encoder/threading unsafe. |
 | Homing | X cycle 1, Z cycle 2 | Verify direction and switch polarity before full `$H`. |
-| Turret | First-class `maijker_5_station_turret` ATC | Requires `M61Qn` confirmed-tool initialization and dry turret tests. |
-| E-stop/control inputs | All config control pins `NO_PIN` | Physical E-stop must be external and tested independently. |
+| Turret | First-class `maijker_5_station_turret` ATC | Five software-dead-reckoned stations; no mechanical confirmation sensor is fitted. |
+| E-stop/control inputs | All config control pins `NO_PIN` | Physical E-stop cuts power but has no FluidNC feedback and must be tested independently. |
 
 ## Axis Audit
 
@@ -28,9 +29,10 @@ Current settings:
 
 - Axis path: `axes.x`
 - Machine axis index: 0
-- `steps_per_mm: 320`
-- `max_rate_mm_per_min: 5000`
-- `acceleration_mm_per_sec2: 500`
+- A4988 microstep DIP: `1 ON, 2 ON, 3 ON` (1/16)
+- `steps_per_mm: 640`
+- `max_rate_mm_per_min: 600`
+- `acceleration_mm_per_sec2: 25`
 - `max_travel_mm: 60`
 - `soft_limits: true`
 - Homing cycle: 1
@@ -54,9 +56,10 @@ Current settings:
 
 - Axis path: `axes.z`
 - Machine axis index: 2
-- `steps_per_mm: 320`
-- `max_rate_mm_per_min: 5000`
-- `acceleration_mm_per_sec2: 500`
+- A4988 microstep DIP: `1 ON, 2 ON, 3 ON` (1/16)
+- `steps_per_mm: 640`
+- `max_rate_mm_per_min: 600`
+- `acceleration_mm_per_sec2: 25`
 - `max_travel_mm: 90`
 - `soft_limits: true`
 - Homing cycle: 2
@@ -105,7 +108,9 @@ Current settings:
 
 - Axis path: `axes.c`
 - Machine axis index: 5
-- `steps_per_mm: 533.333`
+- Direct drive: 1:1, no belt reduction
+- External driver microstep DIP: `S1 OFF, S2 ON, S3 OFF` (1/8)
+- `steps_per_mm: 4.444444` steps/degree
 - `max_rate_mm_per_min: 2000`
 - `acceleration_mm_per_sec2: 75`
 - `max_travel_mm: 100000`
@@ -117,15 +122,22 @@ Current settings:
 
 Important distinction:
 
-- This is a commanded C axis from the older build.
+- This is the positioning drive for the same physical chuck controlled by the
+  HBridge spindle output.
 - It is not spindle phase feedback.
 - Threading and synchronized spindle behavior still require a real spindle
   encoder configured under `lathe.encoder_*`.
+- `lathe.shared_chuck: true` makes firmware reject a block that requests C
+  motion and spindle output together.
+- `$ESP426=MODE=IDLE|C_POSITIONING|SPINDLE` selects exclusive ownership only
+  while the controller, planner, and spindle output are stopped. It never
+  starts motion.
 
 Physical validation required:
 
 - Confirm C jog direction and scale.
-- Confirm C commands do not conflict with spindle drive behavior.
+- Prove that simultaneous C/spindle commands fail closed and that M5 is
+  required before changing ownership.
 - Decide whether `$HC` is safe or should be avoided for this mechanical setup.
 
 ## Probe Audit
@@ -140,6 +152,8 @@ Physical validation required:
 - Confirm probe polarity before any motion.
 - Confirm boot behavior with the expected probe wiring state.
 - Confirm low-feed `G38.2` contact and no-contact failure behavior.
+- Confirm bounded adapter requests through `$ESP427` report contact and final
+  position truthfully.
 - Confirm T5 probe/contact station repeatability before using T5 for touch-off.
 
 ## Spindle and HBridge Audit
@@ -181,6 +195,8 @@ Current behavior:
 - Moves reverse by native lock/backoff steps.
 - Updates FluidNC current tool only after the ATC reports success.
 - Reports turret state through `ESP421`.
+- Reports the station as `software_dead_reckoning` and never mechanically
+  confirmed while `sensor_pin` is `NO_PIN`.
 
 Commissioning risks:
 
@@ -213,6 +229,8 @@ Current settings:
 - `max_css_rpm: 2000.000`
 - `x_axis: 0`
 - `z_axis: 2`
+- `shared_chuck: true`
+- `c_axis: 5`
 - `feedback_stale_ms: 250`
 - `encoder_enable: false`
 - `encoder_pulse_pin: NO_PIN`
@@ -227,6 +245,9 @@ Commissioning interpretation:
 - Threading is explicitly disabled.
 - Encoder values are placeholders and must not be treated as usable feedback.
 - `ESP421` should report disabled/no feedback until encoder hardware is added.
+- `$ESP425` is the adapter/HMI digital-twin snapshot. X/Z positions and tool
+  offsets are millimeters, C position is degrees, and executing file line
+  provenance comes from the planner block.
 
 ## Control and Safety Inputs
 
@@ -237,12 +258,17 @@ Current config pins are all `NO_PIN`:
 - `feed_hold_pin`
 - `cycle_start_pin`
 - `macro0_pin` through `macro3_pin`
+- `fault_pin`
+- `estop_pin`
+- `homing_button_pin`
 
 Required machine safety posture:
 
 - Physical E-stop must cut actuator power independently of FluidNC.
 - Do not rely on the pendant, WiFi, UART, or FluidNC control pins as the only
   emergency stop path.
+- The firmware and adapter must report E-stop feedback as unavailable; a
+  software stop/reset is not an emergency stop.
 - Validate feed hold/reset behavior separately from the physical E-stop.
 
 ## Open Items Before Cutting
@@ -254,8 +280,28 @@ Required machine safety posture:
 | Verify X/Z travel and soft-limit values. | | Open | |
 | Define and document boot-time `M61Qn` confirmed-tool initialization. | | Open | |
 | Dry-run all turret transitions and same-tool no-op behavior. | | Open | |
-| Verify C axis command behavior and whether `$HC` is allowed. | | Open | |
+| Verify shared-chuck ownership, C direction/scale, and whether `$HC` is allowed. | | Open | |
 | Verify probe polarity, startup behavior, and low-feed `G38.2`. | | Open | |
 | Verify spindle direction and alarm/E-stop shutdown. | | Open | |
 | Install and validate encoder before enabling encoder feedback. | | Open | |
+
+## Adapter and HMI contract
+
+The matching FluidNC branch exposes three bounded commands:
+
+```text
+$ESP425
+$ESP426=MODE=IDLE|C_POSITIONING|SPINDLE
+$ESP427=PROBE,AXIS=X|Z,DISTANCE=<signed-mm>,FEED=<mm-per-minute>
+```
+
+`ESP425` is read-only. `ESP426` and `ESP427` require administrator
+authentication and reject extra or malformed fields. They do not provide an
+arbitrary remote G-code write path. The exact schema, units, nullable fields,
+conditions, and stop semantics are in the FluidNC repository document
+`docs/tams-fluidnc-telemetry-v1.md`.
+
+Build this board with the `maijker_wifi` PlatformIO environment. It omits the
+unused onboard-OLED implementation so the firmware and bundled filesystem fit
+the standard 4 MiB layout while retaining two OTA application slots.
 | Keep `lathe.enable_threading: false` until a separate encoder/threading checklist passes. | | Open | |

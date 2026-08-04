@@ -8,8 +8,20 @@ Files:
 - `maijker_xzact_mini_lathe.yaml` - MKS-DLC32 V2.1 machine config for the XZACt
   lathe build. The five-tool turret uses FluidNC's `maijker_5_station_turret`
   ATC driver rather than an SD-card `m6_macro`.
+- `maijker_xzact_mini_lathe_encoder_bench.yaml` - bench-only encoder capture
+  config for AS5600/StepperSpindle pulse and index validation. It enables
+  encoder capture on `gpio.33`/`gpio.39`, keeps threading disabled, and should
+  not replace the safe default config until the signals are scoped.
 - `lathe-v3-config-audit.md` - current config audit, commissioning risks, and
   open physical validation items.
+
+Firmware must be built with the FluidNC `maijker_wifi` PlatformIO environment,
+which omits unused onboard-OLED code so the firmware and bundled filesystem fit
+the standard two-slot 4 MiB layout. The matching firmware's TAMS contract is
+`$ESP425` read-only telemetry, `$ESP426` exclusive shared-chuck ownership
+selection, and `$ESP427` bounded X/Z probing. See the audit before
+commissioning; the turret has no mechanical confirmation sensor and the
+physical E-stop has no controller feedback.
 
 Legacy reference:
 
