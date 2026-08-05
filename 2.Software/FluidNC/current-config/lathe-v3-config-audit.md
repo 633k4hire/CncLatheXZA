@@ -14,7 +14,7 @@ commissioning before cutting.
 | --- | --- | --- |
 | Lathe mode | `lathe.enable: true` | FluidDial should auto-detect lathe mode through `ESP421`. |
 | X/Z operator axes | `x_axis: 0`, `z_axis: 2` | FluidDial maps X/Z/C display slots to machine axes 0/2/5. |
-| Shared chuck | `shared_chuck: true`, `c_axis: 5` | C positioning and HBridge spindle output are mutually exclusive because they drive the same physical chuck. |
+| Shared chuck | `shared_chuck: true`, `c_axis: 5` | C positioning and the CStepper spindle backend are mutually exclusive owners of one physical step/dir drive. |
 | Threading | `enable_threading: false` | Threading must remain disabled until encoder feedback is proven. |
 | Encoder | `encoder_enable: false`, pulse/index `NO_PIN` | Dashboard should show encoder/threading unsafe. |
 | Homing | X cycle 1, Z cycle 2 | Verify direction and switch polarity before full `$H`. |
@@ -88,7 +88,8 @@ Current settings:
 - `steps_per_station: 320`
 - `step_rate_hz: 400`
 - `overshoot_steps: 32`
-- `lock_backoff_steps: 24`
+- `lock_backoff_steps: 32` (matches the 32-step forward overshoot so the
+  reverse seating move returns to the nominal station position)
 - `require_confirmed_tool: true`
 - `current_tool: 0`
 - `sensor_pin: NO_PIN`
@@ -122,8 +123,8 @@ Current settings:
 
 Important distinction:
 
-- This is the positioning drive for the same physical chuck controlled by the
-  HBridge spindle output.
+- This is both the positioning drive and the open-loop spindle drive for the
+  same physical chuck. `M3/M4/M5` use the CStepper backend on these pins.
 - It is not spindle phase feedback.
 - Threading and synchronized spindle behavior still require a real spindle
   encoder configured under `lathe.encoder_*`.
@@ -156,27 +157,33 @@ Physical validation required:
   position truthfully.
 - Confirm T5 probe/contact station repeatability before using T5 for touch-off.
 
-## Spindle and HBridge Audit
+## C-Stepper Spindle Audit
 
 Current settings:
 
-- `HBridge.output_cw_pin: gpio.25`
-- `HBridge.output_ccw_pin: gpio.26`
-- `HBridge.enable_pin: gpio.27`
-- `disable_with_s0: true`
-- `s0_with_disable: true`
-- `spinup_ms: 1000`
-- `spindown_ms: 1000`
-- `tool_num: 5`
-- `speed_map: 0=0.000% 2000=100.000%`
+- `CStepper.axis: 5`
+- `CStepper.cw_positive: true` (direction must still be commissioned)
+- `CStepper.maximum_rpm: 500.0`
+- `CStepper.acceleration_rpm_per_sec: 100.0`
+- `CStepper.operator_watchdog_ms: 12000`
+- 1600 pulses/revolution from the driver DIP setting and C scale
+- The C positioning ceiling remains 2000 degrees/min (5.556 RPM), independent
+  of the 500 RPM continuous-spindle ceiling.
+- 0.225 degrees per microstep
+- `tool_num: 0`
 - `off_on_alarm: true`
 - `atc: maijker_5_station_turret`
 
 Physical validation required:
 
-- Confirm spindle direction for `M3` and `M4`.
-- Confirm `M5`, `S0`, reset, alarm, and physical E-stop stop spindle output.
-- Confirm `tool_num: 5` matches the actual turret count and FluidDial T1-T5 UI.
+- Confirm `M3` is physical CW and `M4` is physical CCW; invert
+  `cw_positive` only if that test proves the labels are reversed.
+- Confirm 0.5, 1.0, and 5.0 RPM against a marker or tachometer.
+- Confirm `M5`, reset, alarm, operator-link timeout, and physical E-stop stop
+  the pulse stream.
+- Confirm C positioning resumes at the dead-reckoned spindle stop angle.
+- The large driver is set to 3.0 A / 3.2 A peak (`S4 OFF, S5 ON, S6 OFF`);
+  verify that against the motor nameplate before extended holding tests.
 
 ## First-Class Turret ATC Audit
 
@@ -226,7 +233,7 @@ Current settings:
 - `enable_feed_per_rev: true`
 - `enable_threading: false`
 - `min_css_diameter_mm: 1.000`
-- `max_css_rpm: 2000.000`
+- `max_css_rpm: 500.000`
 - `x_axis: 0`
 - `z_axis: 2`
 - `shared_chuck: true`
