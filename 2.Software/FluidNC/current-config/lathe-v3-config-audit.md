@@ -112,8 +112,8 @@ Current settings:
 - Direct drive: 1:1, no belt reduction
 - External driver microstep DIP: `S1 OFF, S2 ON, S3 OFF` (1/8)
 - `steps_per_mm: 4.444444` steps/degree
-- `max_rate_mm_per_min: 2000`
-- `acceleration_mm_per_sec2: 75`
+- `max_rate_mm_per_min: 180000` (500 RPM)
+- `acceleration_mm_per_sec2: 9000` (1500 RPM/s)
 - `max_travel_mm: 100000`
 - `soft_limits: false`
 - Limit pins: `NO_PIN`
@@ -163,13 +163,17 @@ Current settings:
 
 - `CStepper.axis: 5`
 - `CStepper.cw_positive: true` (direction must still be commissioned)
+- `CStepper.minimum_rpm: 50.0`
 - `CStepper.maximum_rpm: 500.0`
-- `CStepper.acceleration_rpm_per_sec: 100.0`
+- `CStepper.acceleration_rpm_per_sec: 1500.0`
+- `CStepper.deceleration_rpm_per_sec: 100.0`
 - `CStepper.operator_watchdog_ms: 12000`
-- 1600 pulses/revolution from the driver DIP setting and C scale
-- The C positioning ceiling remains 2000 degrees/min (5.556 RPM), independent
-  of the 500 RPM continuous-spindle ceiling.
+- 1600 pulses/revolution from the 8x driver DIP setting and C scale
+- The C positioning ceiling is 180000 degrees/min (500 RPM); FluidDial uses a
+  lower 250 RPM default for continuous manual C jogging.
 - 0.225 degrees per microstep
+- Normal `M5` decelerates at 100 RPM/s all the way to rest. From 500 RPM the
+  expected stop is approximately five seconds; safety faults stop immediately.
 - `tool_num: 0`
 - `off_on_alarm: true`
 - `atc: maijker_5_station_turret`
