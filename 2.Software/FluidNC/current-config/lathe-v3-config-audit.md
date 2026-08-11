@@ -237,7 +237,7 @@ Current settings:
 - `enable_feed_per_rev: true`
 - `enable_threading: false`
 - `min_css_diameter_mm: 1.000`
-- `max_css_rpm: 500.000`
+- `max_css_rpm: 675.000`
 - `x_axis: 0`
 - `z_axis: 2`
 - `shared_chuck: true`
