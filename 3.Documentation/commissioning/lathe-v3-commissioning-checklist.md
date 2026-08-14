@@ -23,7 +23,7 @@ Complete this before the first powered motion in a commissioning session:
 | Connect FluidDial to FluidNC and wait for stable connected state. | | |
 | Open Status and confirm the lathe dashboard is active. | | |
 | Confirm the displayed operator axes are X/Z/C. | | |
-| Confirm encoder/threading state is visibly unsafe while encoder is disabled. | | |
+| Confirm encoder capture is configured but threading feedback remains not ready until A/B/I pulses are observed. | | |
 | Confirm `ESP421` reports turret configured and tool confirmed, or initialize the physical turret station deliberately with `M61Qn`. | | |
 | Confirm no pending or recoverable FluidDial lathe command is shown before enabling motion. | | |
 | Use only one confirmed M6 command at a time; do not repeat M6 while FluidDial shows `Wait`, `Still waiting`, `Timed out`, or `Alarm during command`. | | |
@@ -63,7 +63,9 @@ power behavior before any actuator can move.
 | FluidDial connects over the intended transport and remains connected for 10 minutes. | | |
 | FluidDial Status scene switches to the lathe dashboard when `ESP421` reports `Lathe enabled=true`. | | |
 | FluidDial dashboard shows X/Z/C slots, not generic X/Y/Z, on the lathe config. | | |
-| FluidDial dashboard shows encoder/threading unsafe while encoder is disabled. | | |
+| FluidDial dashboard shows encoder capture configured and threading feedback not ready before the spindle is turned. | | |
+| DLC32 USB/CH340 is connected to the OnLogic and its stable `/dev/serial/by-id/usb-1a86_USB_Serial-if00-port0` path exists. | | |
+| OnLogic MTConnect `comm_condition` returns to `NORMAL` and `/current` timestamps advance after the serial link is connected. | | |
 | Reset, feed hold, and connection loss behavior are understood before power is applied to drives. | | |
 
 Stop if any item fails. Do not troubleshoot with motors powered until the no
