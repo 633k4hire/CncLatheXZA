@@ -7,9 +7,9 @@ after the previous layer is stable and repeatable.
 Current required posture:
 
 - `lathe.enable_threading: false`
-- `lathe.encoder_enable: false`
-- `lathe.encoder_pulse_pin: NO_PIN`
-- `lathe.encoder_index_pin: NO_PIN`
+- `lathe.encoder_enable: true` for AS5047P commissioning only
+- A/B/I on `gpio.33`/`gpio.35`/`gpio.39`, 1000 PPR
+- No TFT or SD card attached while those shared pins are reserved
 - Physical E-stop cuts drive/spindle power independently of FluidNC.
 - No cutting tool installed until dry motion, homing, limits, and turret motion
   have passed.
@@ -232,9 +232,9 @@ hardware is installed and the config is intentionally changed.
 
 Required before changing threading state:
 
-- Encoder pulse and index wiring installed.
-- Encoder pins updated from `NO_PIN` to verified hardware pins.
-- `lathe.encoder_enable: true` only after low-speed feedback tests pass.
+- Encoder A, B, and index wiring installed with the controller powered off.
+- Configured encoder pins verified against the physical DLC32 revision.
+- `lathe.encoder_enable: true` used only for the controlled low-speed feedback test.
 - `lathe.encoder_pulses_per_rev` set to the real encoder value.
 - `ESP421` reports live measured RPM.
 - `ESP421` reports index detection when an index channel is installed.
@@ -246,6 +246,7 @@ Required before changing threading state:
 | Check | Pass | Notes |
 | --- | --- | --- |
 | Encoder pulse input verified at low speed. | | |
+| Encoder B direction agrees with commanded CW/CCW. | | |
 | Encoder index input verified at low speed. | | |
 | `ESP421` measured RPM is stable and plausible. | | |
 | `ESP421` stale/fault flags remain clear during low-speed spindle tests. | | |

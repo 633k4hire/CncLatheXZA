@@ -16,7 +16,7 @@ commissioning before cutting.
 | X/Z operator axes | `x_axis: 0`, `z_axis: 2` | FluidDial maps X/Z/C display slots to machine axes 0/2/5. |
 | Shared chuck | `shared_chuck: true`, `c_axis: 5` | C positioning and the CStepper spindle backend are mutually exclusive owners of one physical step/dir drive. |
 | Threading | `enable_threading: false` | Threading must remain disabled until encoder feedback is proven. |
-| Encoder | `encoder_enable: false`, pulse/index `NO_PIN` | Dashboard should show encoder/threading unsafe. |
+| Encoder | AS5047P enabled for commissioning; A/B/I `gpio.33`/`gpio.35`/`gpio.39`, 1000 PPR | Threading remains disabled until direction, index, and phase evidence pass. |
 | Homing | X cycle 1, Z cycle 2 | Verify direction and switch polarity before full `$H`. |
 | Turret | First-class `maijker_5_station_turret` ATC | Five software-dead-reckoned stations; no mechanical confirmation sensor is fitted. |
 | E-stop/control inputs | All config control pins `NO_PIN` | Physical E-stop cuts power but has no FluidNC feedback and must be tested independently. |
@@ -243,10 +243,12 @@ Current settings:
 - `shared_chuck: true`
 - `c_axis: 5`
 - `feedback_stale_ms: 250`
-- `encoder_enable: false`
-- `encoder_pulse_pin: NO_PIN`
-- `encoder_index_pin: NO_PIN`
-- `encoder_pulses_per_rev: 1`
+- `encoder_enable: true`
+- `encoder_pulse_pin: gpio.33`
+- `encoder_b_pin: gpio.35`
+- `encoder_index_pin: gpio.39`
+- `encoder_direction_invert: false`
+- `encoder_pulses_per_rev: 1000`
 
 Commissioning interpretation:
 
@@ -254,8 +256,10 @@ Commissioning interpretation:
 - CSS and feed-per-rev modes are configured, but should be tested without
   cutting load first.
 - Threading is explicitly disabled.
-- Encoder values are placeholders and must not be treated as usable feedback.
-- `ESP421` should report disabled/no feedback until encoder hardware is added.
+- Encoder values describe the installed AS5047P commissioning wiring but must
+  not be treated as accepted feedback until the low-speed checklist passes.
+- `ESP421` should report stale/unavailable while the encoder is disconnected,
+  then live RPM/direction/index/phase during hand rotation.
 - `$ESP425` is the adapter/HMI digital-twin snapshot. X/Z positions and tool
   offsets are millimeters, C position is degrees, and executing file line
   provenance comes from the planner block.

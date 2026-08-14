@@ -216,9 +216,13 @@ lathe:
   shared_chuck: true
   c_axis: 5
   feedback_stale_ms: 250
-  encoder_enable: false
-  # No spindle/C-axis encoder is currently installed. Keep feedback and
-  # threading disabled until encoder hardware is installed and commissioned.
-  encoder_pulse_pin: NO_PIN
-  encoder_index_pin: NO_PIN
-  encoder_pulses_per_rev: 1
+  encoder_enable: true
+  # AS5047P ABI commissioning profile. A supplies 1000 rising-edge pulses per
+  # revolution, B proves physical direction, and I supplies one index pulse.
+  # Threading remains disabled until the hand-rotation and powered-spindle
+  # acceptance checks pass.
+  encoder_pulse_pin: gpio.33
+  encoder_b_pin: gpio.35
+  encoder_index_pin: gpio.39
+  encoder_direction_invert: false
+  encoder_pulses_per_rev: 1000

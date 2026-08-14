@@ -31,20 +31,26 @@ Commissioning checklist:
 
 - [`lathe-v3-commissioning-checklist.md`](../../../3.Documentation/commissioning/lathe-v3-commissioning-checklist.md)
 
-The physical spindle encoder is intentionally not enabled yet. The config keeps:
+The AS5047P commissioning profile is staged with threading still disabled:
 
 ```yaml
 lathe:
-  encoder_enable: false
-  encoder_pulse_pin: NO_PIN
-  encoder_index_pin: NO_PIN
+  enable_threading: false
+  encoder_enable: true
+  encoder_pulse_pin: gpio.33
+  encoder_b_pin: gpio.35
+  encoder_index_pin: gpio.39
+  encoder_direction_invert: false
+  encoder_pulses_per_rev: 1000
 ```
 
-Recommended MKS-DLC32 V2.1 encoder candidates once the encoder is installed:
+MKS-DLC32 V2.1 AS5047P inputs:
 
-- `gpio.33` for encoder pulse input.
-- `gpio.39` for encoder index input only if SD-card detect is not wired/needed.
+- `gpio.33` for A/pulse input; the TFT must not be attached.
+- `gpio.35` for B/direction on the otherwise-unused Y-limit input.
+- `gpio.39` for I/index; SD-card detect and an inserted SD card must not share it.
 
 Do not enable `lathe.enable_threading` until the spindle encoder reports live RPM,
 index detection, angular phase, revolution count, and a non-stale/non-fault state
-through FluidNC `ESP421`.
+through FluidNC `ESP421`. If hand rotation reports reversed direction, change
+only `encoder_direction_invert`; do not swap A and B after pulse/index proof.
