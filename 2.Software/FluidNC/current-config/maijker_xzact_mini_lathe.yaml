@@ -217,10 +217,8 @@ lathe:
   c_axis: 5
   feedback_stale_ms: 250
   encoder_enable: true
-  # AS5047P ABI commissioning profile. A supplies 1000 rising-edge pulses per
-  # revolution, B proves physical direction, and I supplies one index pulse.
-  # Threading remains disabled until the hand-rotation and powered-spindle
-  # acceptance checks pass.
+  # AS5047P ABI commissioning profile. A/B feedback is operational; Index is
+  # wired and reported for later diagnosis but does not gate A/B feedback.
   encoder_pulse_pin: gpio.33
   encoder_b_pin: gpio.35
   encoder_index_pin: gpio.39
