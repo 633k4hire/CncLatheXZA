@@ -10,7 +10,7 @@ Files:
   ATC driver rather than an SD-card `m6_macro`.
 - `maijker_xzact_mini_lathe_encoder_bench.yaml` - bench-only encoder capture
   config for AS5600/StepperSpindle pulse and index validation. It enables
-  encoder capture on `gpio.33`/`gpio.39`, keeps threading disabled, and should
+  encoder capture on `gpio.33`/`gpio.4`, keeps threading disabled, and should
   not replace the safe default config until the signals are scoped.
 - `lathe-v3-config-audit.md` - current config audit, commissioning risks, and
   open physical validation items.
@@ -39,7 +39,7 @@ lathe:
   encoder_enable: true
   encoder_pulse_pin: gpio.33
   encoder_b_pin: gpio.35
-  encoder_index_pin: gpio.39
+  encoder_index_pin: gpio.4
   encoder_direction_invert: false
   encoder_pulses_per_rev: 1000
 ```
@@ -48,7 +48,9 @@ MKS-DLC32 V2.1 AS5047P inputs:
 
 - `gpio.33` for A/pulse input; the TFT must not be attached.
 - `gpio.35` for B/direction on the otherwise-unused Y-limit input.
-- `gpio.39` for I/index; SD-card detect and an inserted SD card must not share it.
+- `gpio.4` for I/index on the direct J2/I2C pin. This avoids both the DLC32
+  `gpio.39`/SD-detect conflict and the one-way TFT buffer on GPIO25/26, so the
+  SD card may remain installed.
 
 Do not enable `lathe.enable_threading` until the spindle encoder reports live RPM,
 index detection, angular phase, revolution count, and a non-stale/non-fault state

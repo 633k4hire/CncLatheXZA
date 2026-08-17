@@ -16,7 +16,7 @@ commissioning before cutting.
 | X/Z operator axes | `x_axis: 0`, `z_axis: 2` | FluidDial maps X/Z/C display slots to machine axes 0/2/5. |
 | Shared chuck | `shared_chuck: true`, `c_axis: 5` | C positioning and the CStepper spindle backend are mutually exclusive owners of one physical step/dir drive. |
 | Threading | `enable_threading: false` | Threading must remain disabled until encoder feedback is proven. |
-| Encoder | AS5047P enabled for commissioning; A/B/I `gpio.33`/`gpio.35`/`gpio.39`, 1000 PPR | Threading remains disabled until direction, index, and phase evidence pass. |
+| Encoder | AS5047P enabled for commissioning; A/B/I `gpio.33`/`gpio.35`/`gpio.4`, 1000 PPR | GPIO4 is a direct input and avoids the GPIO39/SD-detect and GPIO25/26 TFT-buffer conflicts. Threading remains disabled until direction, index, and phase evidence pass. |
 | Homing | X cycle 1, Z cycle 2 | Verify direction and switch polarity before full `$H`. |
 | Turret | First-class `maijker_5_station_turret` ATC | Five software-dead-reckoned stations; no mechanical confirmation sensor is fitted. |
 | E-stop/control inputs | All config control pins `NO_PIN` | Physical E-stop cuts power but has no FluidNC feedback and must be tested independently. |
@@ -246,7 +246,7 @@ Current settings:
 - `encoder_enable: true`
 - `encoder_pulse_pin: gpio.33`
 - `encoder_b_pin: gpio.35`
-- `encoder_index_pin: gpio.39`
+- `encoder_index_pin: gpio.4`
 - `encoder_direction_invert: false`
 - `encoder_pulses_per_rev: 1000`
 

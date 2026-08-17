@@ -8,8 +8,9 @@ Current required posture:
 
 - `lathe.enable_threading: false`
 - `lathe.encoder_enable: true` for AS5047P commissioning only
-- A/B/I on `gpio.33`/`gpio.35`/`gpio.39`, 1000 PPR
-- No TFT or SD card attached while those shared pins are reserved
+- A/B/I on `gpio.33`/`gpio.35`/`gpio.4`, 1000 PPR
+- No TFT attached while GPIO33 is reserved; the SD card may remain installed
+  because Index uses direct GPIO4 instead of GPIO39/SD-detect
 - Physical E-stop cuts drive/spindle power independently of FluidNC.
 - No cutting tool installed until dry motion, homing, limits, and turret motion
   have passed.
@@ -46,6 +47,7 @@ If FluidDial shows a recoverable M6 error such as `Timed out` or
 
 | Date | Operator | FluidNC commit/config | FluidDial commit | Result | Notes |
 | --- | --- | --- | --- | --- | --- |
+| 2026-08-17 | Matthew | `c07cdab5` application / `181472cd` GPIO4 config | `dfa278a` | Encoder hand test passed | GPIO4 Index; 9,726 A pulses, 10 Index pulses, settled intervals exactly 1,000 pulses/rev, both directions, no fault. Threading remains disabled. |
 | | | | | | |
 
 ## 1. Power-On, No Motors, No Spindle
