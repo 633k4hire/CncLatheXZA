@@ -110,8 +110,8 @@ Current settings:
 - Axis path: `axes.c`
 - Machine axis index: 5
 - Direct drive: 1:1, no belt reduction
-- External driver microstep DIP: `S1 OFF, S2 OFF, S3 ON` (1/16)
-- `steps_per_mm: 8.888889` steps/degree
+- External driver microstep DIP: `S1 OFF, S2 ON, S3 OFF` (1/8)
+- `steps_per_mm: 4.444444` steps/degree
 - `max_rate_mm_per_min: 243000` (675 RPM)
 - `acceleration_mm_per_sec2: 9000` (1500 RPM/s)
 - `max_travel_mm: 100000`
@@ -168,10 +168,10 @@ Current settings:
 - `CStepper.acceleration_rpm_per_sec: 1500.0`
 - `CStepper.deceleration_rpm_per_sec: 100.0`
 - `CStepper.operator_watchdog_ms: 12000`
-- 3200 pulses/revolution from the 16x driver DIP setting and C scale
+- 1600 pulses/revolution from the 8x driver DIP setting and C scale
 - The C positioning ceiling is 243000 degrees/min (675 RPM); FluidDial uses a
   lower 250 RPM default for continuous manual C jogging.
-- 0.1125 degrees per microstep
+- 0.225 degrees per microstep
 - Normal `M5` decelerates at 100 RPM/s all the way to rest. From 675 RPM the
   expected stop is approximately 6.75 seconds; safety faults stop immediately.
 - `tool_num: 0`
