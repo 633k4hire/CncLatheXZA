@@ -12,6 +12,10 @@ Files:
   config for AS5600/StepperSpindle pulse and index validation. It enables
   encoder capture on `gpio.33`/`gpio.4`, keeps threading disabled, and should
   not replace the safe default config until the signals are scoped.
+- `maijker_xzact_mini_lathe_phase5_g33_dry.yaml` - attended, no-cut Phase 5
+  commanded-C G33 commissioning profile. It is identical to the current
+  AS5047P production machine profile except for its explicit identity and
+  `enable_threading: true`. Restore the production profile after the gate.
 - `lathe-v3-config-audit.md` - current config audit, commissioning risks, and
   open physical validation items.
 
